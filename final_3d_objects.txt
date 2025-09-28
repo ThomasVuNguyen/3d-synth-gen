@@ -1,0 +1,1035 @@
+# FURNITURE & HOME FURNISHINGS (47 items)
+armchair
+bar stool
+bassinet
+bed
+bed frame
+bench
+bookcase
+bookshelf
+buffet
+bunk bed
+cabinet
+chair
+chest of drawers
+coffee table
+couch
+credenza
+crib
+daybed
+desk
+dining chair
+dining table
+dresser
+end table
+entertainment center
+filing cabinet
+footstool
+futon
+headboard
+highchair
+hutch
+kitchen table
+loveseat
+mattress
+nightstand
+office chair
+ottoman
+recliner
+rocking chair
+sectional
+shelf
+side table
+sofa
+stool
+table
+tv stand
+vanity
+wardrobe
+
+# VEHICLES & TRANSPORTATION (56 items)
+airplane
+ambulance
+atv
+bicycle
+blimp
+boat
+bulldozer
+bus
+canoe
+car
+convertible
+coupe
+crane
+delivery truck
+dump truck
+excavator
+fire truck
+forklift
+garbage truck
+glider
+golf cart
+helicopter
+hovercraft
+jet
+jeep
+kayak
+limousine
+locomotive
+minivan
+motorcycle
+pickup truck
+police car
+race car
+rocket
+sailboat
+school bus
+scooter
+sedan
+ship
+skateboard
+snowmobile
+spaceship
+sports car
+station wagon
+steamboat
+submarine
+suv
+taxi
+tow truck
+tractor
+trailer
+train
+trolley
+truck
+van
+yacht
+
+# ELECTRONICS & DEVICES (89 items)
+air conditioner
+alarm clock
+amplifier
+answering machine
+camera
+camcorder
+cd player
+cell phone
+computer
+desktop computer
+digital camera
+dishwasher
+dryer
+dvd player
+earbuds
+electric fan
+electric guitar
+fax machine
+flashlight
+gamepad
+hair dryer
+hard drive
+headphones
+home theater
+joystick
+keyboard
+laptop
+microphone
+microwave
+mixer
+modem
+monitor
+mouse
+music player
+phone
+photocopier
+portable radio
+printer
+projector
+radio
+receiver
+refrigerator
+remote control
+router
+satellite dish
+scanner
+smartphone
+speaker
+stereo
+tablet
+telephone
+television
+turntable
+usb drive
+vcr
+video camera
+washing machine
+webcam
+
+# KITCHEN & DINING (122 items)
+baking dish
+baking sheet
+blender
+bottle
+bottle opener
+bowl
+bread box
+can opener
+carafe
+casserole dish
+cheese grater
+coffee maker
+coffee mug
+colander
+cookie jar
+cooking pot
+corkscrew
+cup
+cutting board
+dinner plate
+dishwasher
+electric kettle
+espresso machine
+food processor
+fork
+frying pan
+garlic press
+glass
+gravy boat
+grater
+ice bucket
+ice cream maker
+juicer
+kettle
+kitchen scale
+knife
+ladle
+measuring cup
+measuring spoons
+microwave
+mixing bowl
+mortar and pestle
+mug
+oven
+pan
+pasta maker
+pepper mill
+pitcher
+plate
+pot
+pressure cooker
+refrigerator
+rice cooker
+rolling pin
+salad bowl
+salt shaker
+saucepan
+serving spoon
+serving tray
+skillet
+slow cooker
+soup bowl
+spatula
+spoon
+steamer
+stockpot
+strainer
+sugar bowl
+tablespoon
+tea kettle
+teacup
+teapot
+teaspoon
+timer
+toaster
+tongs
+waffle iron
+water bottle
+whisk
+wine glass
+wok
+wooden spoon
+
+# TOOLS & HARDWARE (98 items)
+adjustable wrench
+allen wrench
+anvil
+awl
+axe
+bolt
+chisel
+circular saw
+clamp
+claw hammer
+crowbar
+drill
+drill bit
+electric drill
+file
+hacksaw
+hammer
+hand drill
+hand saw
+hex wrench
+jigsaw
+ladder
+level
+mallet
+measuring tape
+nail
+needle nose pliers
+nut
+pickaxe
+pipe wrench
+pliers
+power drill
+rake
+rivet
+router
+ruler
+sandpaper
+saw
+saw horse
+screw
+screwdriver
+sledgehammer
+socket wrench
+soldering iron
+square
+staple gun
+step ladder
+tape measure
+toolbox
+utility knife
+vise
+wire cutters
+wrench
+
+# HOME & GARDEN ITEMS (156 items)
+air freshener
+ashtray
+basket
+bath towel
+bathroom scale
+blanket
+broom
+bucket
+candle
+candlestick
+carpet
+ceiling fan
+cleaning supplies
+clock
+clothes hanger
+clothes iron
+coaster
+coat rack
+curtains
+cushion
+doormat
+duster
+dustpan
+electric heater
+extension cord
+fan
+fertilizer spreader
+fire extinguisher
+flashlight
+floor lamp
+flower pot
+garden hose
+garden rake
+garden shovel
+garbage can
+hand towel
+hose nozzle
+iron
+ironing board
+kitchen towel
+ladder
+lamp
+lampshade
+laundry basket
+lawn mower
+light bulb
+magazine rack
+magnifying glass
+mirror
+mop
+paper towel
+picture frame
+pillow
+plant pot
+planter
+power cord
+pruning shears
+recycling bin
+rug
+scissors
+smoke detector
+soap dispenser
+step stool
+storage box
+table lamp
+thermometer
+throw pillow
+tissue box
+toilet brush
+toilet paper
+towel
+towel rack
+trash bag
+trash can
+umbrella
+umbrella stand
+vacuum cleaner
+vase
+watering can
+welcome mat
+window blinds
+wine rack
+
+# SPORTS & RECREATION (98 items)
+archery bow
+badminton racket
+ball
+barbell
+baseball
+baseball bat
+baseball glove
+basketball
+basketball hoop
+bicycle helmet
+billiard ball
+bowling ball
+bowling pin
+boxing gloves
+croquet mallet
+dart
+dartboard
+dumbbell
+exercise bike
+exercise mat
+fishing rod
+fitness ball
+football
+frisbee
+golf ball
+golf club
+golf tee
+gymnastic rings
+hockey puck
+hockey stick
+ice skates
+jump rope
+kayak paddle
+kite
+lacrosse stick
+life jacket
+ping pong ball
+ping pong paddle
+pool cue
+punching bag
+racquetball racket
+roller skates
+rowing machine
+rugby ball
+skateboard
+ski boots
+ski poles
+skis
+snowboard
+soccer ball
+softball
+squash racket
+surfboard
+swimming goggles
+table tennis ball
+tennis ball
+tennis racket
+volleyball
+volleyball net
+weight plate
+wrestling mat
+yoga mat
+
+# MUSICAL INSTRUMENTS (67 items)
+accordion
+acoustic guitar
+bagpipes
+banjo
+bass drum
+bass guitar
+bassoon
+bongos
+bugle
+castanets
+cello
+clarinet
+classical guitar
+conga drums
+cymbals
+didgeridoo
+double bass
+drum kit
+drum stick
+dulcimer
+electric guitar
+electric piano
+flute
+french horn
+guitar
+guitar pick
+harmonica
+harp
+harpsichord
+kazoo
+keyboard
+mandolin
+maracas
+oboe
+organ
+piano
+piccolo
+recorder
+saxophone
+sitar
+snare drum
+steel drum
+synthesizer
+tabla
+tambourine
+trombone
+trumpet
+tuba
+tuning fork
+ukulele
+violin
+violin bow
+xylophone
+
+# OFFICE & SCHOOL SUPPLIES (87 items)
+adhesive tape
+binder
+binder clip
+book
+bookmark
+briefcase
+bulletin board
+calculator
+calendar
+chair mat
+clipboard
+computer desk
+correction fluid
+desk organizer
+envelope
+eraser
+file cabinet
+filing folder
+fountain pen
+globe
+glue stick
+graph paper
+highlighter
+hole punch
+index card
+ink cartridge
+laptop bag
+letter opener
+magnifying glass
+marker
+memo pad
+notebook
+notepad
+overhead projector
+paper
+paper clip
+paper shredder
+pencil
+pencil case
+pencil sharpener
+pen
+portfolio
+post-it notes
+printer paper
+protractor
+push pin
+rubber band
+rubber stamp
+ruler
+safe
+scissors
+scotch tape
+spiral notebook
+staple remover
+stapler
+staples
+sticky notes
+tape dispenser
+three-ring binder
+thumb tack
+typewriter
+wall calendar
+wastebasket
+whiteboard
+whiteboard marker
+
+# CLOTHING & ACCESSORIES (89 items)
+backpack
+badge
+bag
+baseball cap
+belt
+boot
+bracelet
+briefcase
+brooch
+button
+cap
+coat hanger
+cufflinks
+duffel bag
+earring
+fanny pack
+glasses
+glove
+hair clip
+hair tie
+handbag
+handkerchief
+hat
+headband
+jewelry box
+key chain
+luggage
+messenger bag
+mitten
+necklace
+necktie
+pendant
+pin
+pocket watch
+purse
+ring
+sandal
+scarf
+shoe
+shoe lace
+shoulder bag
+sneaker
+sock
+suitcase
+sunglasses
+tie
+tie clip
+tote bag
+travel bag
+umbrella
+wallet
+watch
+wristwatch
+
+# BUILDING & ARCHITECTURE (78 items)
+barn
+bridge
+building
+castle
+chimney
+church
+door
+door handle
+door knob
+driveway
+fence
+fire escape
+garage
+gate
+gazebo
+greenhouse
+house
+ladder
+lighthouse
+mailbox
+monument
+pavilion
+porch
+railing
+ramp
+roof
+shed
+silo
+staircase
+stairs
+statue
+steps
+tower
+wall
+window
+windmill
+
+# FOOD & BEVERAGES (124 items)
+apple
+apricot
+artichoke
+asparagus
+avocado
+bacon
+bagel
+banana
+beans
+beef
+bell pepper
+blackberry
+blueberry
+bread
+broccoli
+butter
+cabbage
+cake
+candy
+cantaloupe
+carrot
+celery
+cereal
+cheese
+cherry
+chicken
+coconut
+cookie
+corn
+cracker
+cucumber
+donut
+egg
+eggplant
+fish
+grapes
+green beans
+hamburger
+honey
+hot dog
+ice cream
+lemon
+lettuce
+lime
+mango
+meat
+melon
+milk
+muffin
+mushroom
+noodles
+nuts
+onion
+orange
+pancake
+pasta
+peach
+peanut
+pear
+pepper
+pie
+pineapple
+pizza
+plum
+potato
+pretzel
+pumpkin
+radish
+raspberry
+rice
+salad
+sandwich
+soup
+spaghetti
+spinach
+strawberry
+taco
+toast
+tomato
+turkey
+watermelon
+yogurt
+
+# NATURE & PLANTS (89 items)
+acorn
+bamboo
+bark
+branch
+bush
+cactus
+clover
+daisy
+dandelion
+fern
+fir tree
+flower
+grass
+holly
+ivy
+leaf
+lichen
+lily
+log
+maple tree
+moss
+mushroom
+oak tree
+orchid
+palm tree
+pine cone
+pine tree
+plant
+poplar tree
+reed
+rose
+seaweed
+shrub
+stump
+sunflower
+tree
+twig
+vine
+willow tree
+
+# TOYS & GAMES (78 items)
+action figure
+ball
+balloon
+blocks
+board game
+bubble
+building blocks
+cards
+checkers
+chess piece
+chess set
+coloring book
+crayons
+dice
+doll
+dollhouse
+dominos
+jigsaw puzzle
+jump rope
+kite
+lego
+marbles
+model airplane
+model car
+model train
+play dough
+playing cards
+puzzle
+rattle
+robot
+rocking horse
+rubber ball
+scrabble
+slinky
+spinning top
+stuffed animal
+teddy bear
+toy car
+toy horse
+toy soldier
+toy train
+trading cards
+tricycle
+video game
+water gun
+yo-yo
+
+# MEDICAL & HEALTH (67 items)
+bandage
+blood pressure cuff
+cane
+cast
+contact lens
+crutch
+defibrillator
+eyeglasses
+first aid kit
+gauze
+glasses
+hearing aid
+ice pack
+inhaler
+medical chart
+medicine bottle
+microscope
+neck brace
+pill
+prosthetic
+scale
+splint
+stethoscope
+stretcher
+surgical mask
+syringe
+thermometer
+tongue depressor
+walker
+wheelchair
+x-ray
+
+# CONTAINERS & STORAGE (89 items)
+bag
+barrel
+basket
+bin
+bottle
+box
+briefcase
+bucket
+can
+canister
+carton
+chest
+container
+cooler
+crate
+drawer
+duffel bag
+envelope
+file box
+garbage bag
+gift box
+glass jar
+hamper
+jar
+jewelry box
+jug
+laundry basket
+lunchbox
+mailbox
+package
+pail
+pitcher
+plastic bag
+purse
+safe
+satchel
+shopping bag
+storage bin
+suitcase
+tank
+toolbox
+trash bag
+trash can
+trunk
+tupperware
+vase
+waste basket
+
+# BATHROOM & PERSONAL CARE (67 items)
+bath mat
+bath towel
+bathtub
+brush
+comb
+cotton swab
+deodorant
+electric razor
+face wash
+hair brush
+hair dryer
+hand soap
+hand towel
+lotion
+mirror
+nail clipper
+perfume
+razor
+shampoo
+shower curtain
+soap
+soap dispenser
+toilet
+toilet brush
+toilet paper
+toothbrush
+toothpaste
+towel
+tweezers
+washcloth
+
+# MISCELLANEOUS OBJECTS (156 items)
+anchor
+antenna
+badge
+balloon
+battery
+bell
+binoculars
+book
+bottle cap
+bottle opener
+bulb
+button
+cable
+calendar
+candle
+chain
+clock
+coin
+compass
+crown
+diamond
+doorbell
+drill bit
+envelope
+eraser
+flag
+flashlight
+funnel
+gear
+globe
+hammer
+hinge
+hook
+hourglass
+key
+keychain
+ladder
+lens
+lever
+light bulb
+lock
+magnet
+magnifying glass
+map
+medal
+mirror
+nail
+needle
+nut
+paddle
+paper clip
+parachute
+pearl
+photograph
+pin
+pipe
+pulley
+rope
+rubber band
+ruler
+screw
+seal
+spring
+stamp
+staple
+statue
+string
+sword
+telescope
+thread
+tire
+trophy
+tube
+valve
+wheel
+whistle
+wire
+zipper

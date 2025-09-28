@@ -84,8 +84,9 @@ def get_thread_client():
         thread_local.client = setup_bedrock_client()
     return thread_local.client
 
-def generate_blender_script_parallel(object_name: str) -> tuple[str, str, int, int]:
-    """Thread-safe function to generate Blender script. Returns (object_name, script, input_tokens, output_tokens)."""
+def generate_blender_script_parallel(object_name: str) -> tuple[str, str, int, int, float]:
+    """Thread-safe function to generate Blender script. Returns (object_name, script, input_tokens, output_tokens, duration)."""
+    start_time = time.time()
     try:
         client = get_thread_client()
         prompt = create_prompt(object_name)
@@ -114,18 +115,25 @@ def generate_blender_script_parallel(object_name: str) -> tuple[str, str, int, i
         for model_id in models_to_try:
             try:
                 # Call Bedrock API
+                api_start = time.time()
                 response = client.invoke_model(
                     modelId=model_id,
                     body=json.dumps(body),
                     contentType="application/json"
                 )
+                api_duration = time.time() - api_start
 
                 # Parse response
                 response_body = json.loads(response['body'].read())
                 generated_code = response_body['content'][0]['text']
                 output_tokens = count_tokens(generated_code)
 
-                return object_name, generated_code, input_tokens, output_tokens
+                total_duration = time.time() - start_time
+
+                # Print per-query stats
+                print(f"📝 {object_name}: {format_time(api_duration)} | 📥 {input_tokens} → 📤 {output_tokens} tokens | {model_id.split('.')[-1]}")
+
+                return object_name, generated_code, input_tokens, output_tokens, total_duration
 
             except Exception as model_error:
                 logger.warning(f"Model {model_id} failed for {object_name}: {model_error}")
@@ -134,17 +142,21 @@ def generate_blender_script_parallel(object_name: str) -> tuple[str, str, int, i
         # If all models fail, return error message
         error_msg = f"# Error: All Bedrock models failed for {object_name}. Please check AWS credentials and model access."
         logger.error(f"All Bedrock models failed for {object_name}")
-        return object_name, error_msg, input_tokens, 0
+        total_duration = time.time() - start_time
+        print(f"❌ {object_name}: {format_time(total_duration)} | Failed all models")
+        return object_name, error_msg, input_tokens, 0, total_duration
 
     except Exception as e:
         logger.error(f"Error generating script for {object_name}: {e}")
         error_msg = f"# Error generating script for {object_name}: {str(e)}"
-        return object_name, error_msg, 0, 0
+        total_duration = time.time() - start_time
+        print(f"❌ {object_name}: {format_time(total_duration)} | Error: {str(e)[:50]}...")
+        return object_name, error_msg, 0, 0, total_duration
 
 def generate_blender_script(client, object_name: str) -> tuple[str, int, int]:
     """Generate Blender script using AWS Bedrock. Returns (script, input_tokens, output_tokens)."""
     # Legacy function for compatibility - calls the parallel version
-    _, script, input_tokens, output_tokens = generate_blender_script_parallel(object_name)
+    _, script, input_tokens, output_tokens, _ = generate_blender_script_parallel(object_name)
     return script, input_tokens, output_tokens
 
 def load_existing_results(output_file: str) -> Dict[str, str]:
@@ -224,7 +236,7 @@ def format_time(seconds: float) -> str:
     else:
         return f"{seconds/3600:.1f}h"
 
-def process_batch_parallel(objects_to_generate: List[str], max_workers: int, pbar, results_dict: Dict[str, Dict], lock: threading.Lock) -> tuple[int, int, int]:
+def process_batch_parallel(objects_to_generate: List[str], max_workers: int, pbar, results_dict: Dict[str, Dict], lock: threading.Lock, query_times: List[float]) -> tuple[int, int, int]:
     """Process a batch of objects in parallel."""
     total_input_tokens = 0
     total_output_tokens = 0
@@ -240,7 +252,7 @@ def process_batch_parallel(objects_to_generate: List[str], max_workers: int, pba
         # Process completed tasks
         for future in as_completed(future_to_object):
             try:
-                object_name, script, input_tokens, output_tokens = future.result()
+                object_name, script, input_tokens, output_tokens, duration = future.result()
 
                 with lock:
                     results_dict[object_name] = {
@@ -250,9 +262,13 @@ def process_batch_parallel(objects_to_generate: List[str], max_workers: int, pba
                     generated_count += 1
                     total_input_tokens += input_tokens
                     total_output_tokens += output_tokens
+                    query_times.append(duration)
+
+                    # Calculate running averages
+                    avg_time = sum(query_times) / len(query_times)
 
                     pbar.update(1)
-                    pbar.set_postfix_str(f"🔄 Generated: {object_name[:20]}... | Workers: {max_workers}")
+                    pbar.set_postfix_str(f"Avg: {format_time(avg_time)} | Workers: {max_workers}")
 
             except Exception as e:
                 object_name = future_to_object[future]
@@ -305,6 +321,7 @@ def main():
 
         # Progress tracking
         start_time = time.time()
+        query_times = []  # Track individual query times
 
         # Create thread-safe results dictionary and lock
         results_dict = {}
@@ -321,6 +338,8 @@ def main():
 
         # Process new objects in parallel batches
         if objects_to_generate:
+            print("🚀 Starting parallel generation...\n")
+
             with tqdm(total=len(objects), desc="Processing objects",
                      bar_format="{l_bar}{bar}| {n_fmt}/{total_fmt} [{elapsed}<{remaining}]",
                      ncols=100, initial=skipped_count) as pbar:
@@ -330,7 +349,7 @@ def main():
                     batch = objects_to_generate[i:i + batch_size]
 
                     batch_generated, batch_input_tokens, batch_output_tokens = process_batch_parallel(
-                        batch, max_workers, pbar, results_dict, lock
+                        batch, max_workers, pbar, results_dict, lock, query_times
                     )
 
                     generated_count += batch_generated
@@ -356,8 +375,10 @@ def main():
         print(f"   🧵 Used {max_workers} parallel workers")
 
         if generated_count > 0:
-            avg_time_per_gen = total_time / generated_count if generated_count > 0 else 0
-            print(f"   ⚡ Avg time per generation: {format_time(avg_time_per_gen)}")
+            avg_time_per_gen = sum(query_times) / len(query_times) if query_times else 0
+            wall_time_per_gen = total_time / generated_count if generated_count > 0 else 0
+            print(f"   ⚡ Avg time per query: {format_time(avg_time_per_gen)}")
+            print(f"   🕐 Wall time per generation: {format_time(wall_time_per_gen)}")
             speedup = max_workers if total_time > 0 else 1
             print(f"   🚀 Estimated speedup: ~{speedup:.1f}x vs sequential")
 

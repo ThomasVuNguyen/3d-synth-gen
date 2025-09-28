@@ -13,6 +13,8 @@ from datetime import datetime, timedelta
 from typing import List, Dict, Any
 from tqdm import tqdm
 import tiktoken
+from concurrent.futures import ThreadPoolExecutor, as_completed
+import threading
 
 # Set up logging
 logging.basicConfig(level=logging.INFO)
@@ -24,6 +26,9 @@ try:
 except:
     # Fallback tokenizer
     tokenizer = tiktoken.get_encoding("cl100k_base")
+
+# Thread-local storage for clients
+thread_local = threading.local()
 
 def setup_bedrock_client():
     """Initialize AWS Bedrock client with credentials."""
@@ -73,11 +78,19 @@ def create_prompt(object_name: str) -> str:
     """Create the prompt for generating Blender script."""
     return f"""Create a Blender Python script that constructs a simple 3D model of {object_name} using only primitive meshes (bpy.ops.mesh.primitive_uv_sphere_add, primitive_cube_add, primitive_cone_add, primitive_cylinder_add, etc.), positions and scales them into reasonable proportions, deletes any default objects at the start, groups the parts together, and then exports the model as an ASCII STL file named duck.stl. Return only the runnable Python code, no explanations."""
 
-def generate_blender_script(client, object_name: str) -> str:
-    """Generate Blender script using AWS Bedrock."""
+def get_thread_client():
+    """Get or create a Bedrock client for the current thread."""
+    if not hasattr(thread_local, 'client'):
+        thread_local.client = setup_bedrock_client()
+    return thread_local.client
+
+def generate_blender_script_parallel(object_name: str) -> tuple[str, str, int, int]:
+    """Thread-safe function to generate Blender script. Returns (object_name, script, input_tokens, output_tokens)."""
     try:
+        client = get_thread_client()
         prompt = create_prompt(object_name)
-        
+        input_tokens = count_tokens(prompt)
+
         # Prepare the request body for Claude
         body = {
             "anthropic_version": "bedrock-2023-05-31",
@@ -89,7 +102,7 @@ def generate_blender_script(client, object_name: str) -> str:
                 }
             ]
         }
-        
+
         # Try different models in order of preference (most accessible first)
         models_to_try = [
             "us.anthropic.claude-sonnet-4-20250514-v1:0",     # Claude Sonnet 4 (inference profile)
@@ -97,7 +110,7 @@ def generate_blender_script(client, object_name: str) -> str:
             "anthropic.claude-3-haiku-20240307-v1:0",         # Claude 3 Haiku
             "anthropic.claude-3-5-sonnet-20240620-v1:0",      # Claude 3.5 Sonnet
         ]
-        
+
         for model_id in models_to_try:
             try:
                 # Call Bedrock API
@@ -106,26 +119,33 @@ def generate_blender_script(client, object_name: str) -> str:
                     body=json.dumps(body),
                     contentType="application/json"
                 )
-                
+
                 # Parse response
                 response_body = json.loads(response['body'].read())
                 generated_code = response_body['content'][0]['text']
-                
-                logger.info(f"Generated script for {object_name} using {model_id}")
-                return generated_code
-                
+                output_tokens = count_tokens(generated_code)
+
+                return object_name, generated_code, input_tokens, output_tokens
+
             except Exception as model_error:
-                logger.warning(f"Model {model_id} failed: {model_error}")
+                logger.warning(f"Model {model_id} failed for {object_name}: {model_error}")
                 continue
-        
+
         # If all models fail, return error message
         error_msg = f"# Error: All Bedrock models failed for {object_name}. Please check AWS credentials and model access."
         logger.error(f"All Bedrock models failed for {object_name}")
-        return error_msg
-        
+        return object_name, error_msg, input_tokens, 0
+
     except Exception as e:
         logger.error(f"Error generating script for {object_name}: {e}")
-        return f"# Error generating script for {object_name}: {str(e)}"
+        error_msg = f"# Error generating script for {object_name}: {str(e)}"
+        return object_name, error_msg, 0, 0
+
+def generate_blender_script(client, object_name: str) -> tuple[str, int, int]:
+    """Generate Blender script using AWS Bedrock. Returns (script, input_tokens, output_tokens)."""
+    # Legacy function for compatibility - calls the parallel version
+    _, script, input_tokens, output_tokens = generate_blender_script_parallel(object_name)
+    return script, input_tokens, output_tokens
 
 def load_existing_results(output_file: str) -> Dict[str, str]:
     """Load existing results from JSON file and return as dict {input: output}."""
@@ -165,6 +185,7 @@ Examples:
   python generate-dataset.py              # Process all objects
   python generate-dataset.py 100          # Process first 100 objects
   python generate-dataset.py --count 50   # Process first 50 objects
+  python generate-dataset.py --workers 8  # Use 8 parallel workers
         """
     )
     parser.add_argument(
@@ -180,7 +201,70 @@ Examples:
         dest='count_flag',
         help='Alternative way to specify number of objects'
     )
+    parser.add_argument(
+        '--workers',
+        type=int,
+        default=4,
+        help='Number of parallel workers (default: 4, max: 10)'
+    )
+    parser.add_argument(
+        '--batch-size',
+        type=int,
+        default=20,
+        help='Batch size for parallel processing (default: 20)'
+    )
     return parser.parse_args()
+
+def format_time(seconds: float) -> str:
+    """Format seconds into human-readable time."""
+    if seconds < 60:
+        return f"{seconds:.1f}s"
+    elif seconds < 3600:
+        return f"{seconds/60:.1f}m"
+    else:
+        return f"{seconds/3600:.1f}h"
+
+def process_batch_parallel(objects_to_generate: List[str], max_workers: int, pbar, results_dict: Dict[str, Dict], lock: threading.Lock) -> tuple[int, int, int]:
+    """Process a batch of objects in parallel."""
+    total_input_tokens = 0
+    total_output_tokens = 0
+    generated_count = 0
+
+    with ThreadPoolExecutor(max_workers=max_workers) as executor:
+        # Submit all tasks
+        future_to_object = {
+            executor.submit(generate_blender_script_parallel, obj): obj
+            for obj in objects_to_generate
+        }
+
+        # Process completed tasks
+        for future in as_completed(future_to_object):
+            try:
+                object_name, script, input_tokens, output_tokens = future.result()
+
+                with lock:
+                    results_dict[object_name] = {
+                        "input": object_name,
+                        "output": script
+                    }
+                    generated_count += 1
+                    total_input_tokens += input_tokens
+                    total_output_tokens += output_tokens
+
+                    pbar.update(1)
+                    pbar.set_postfix_str(f"🔄 Generated: {object_name[:20]}... | Workers: {max_workers}")
+
+            except Exception as e:
+                object_name = future_to_object[future]
+                logger.error(f"Error processing {object_name}: {e}")
+                with lock:
+                    results_dict[object_name] = {
+                        "input": object_name,
+                        "output": f"# Error generating script for {object_name}: {str(e)}"
+                    }
+                    pbar.update(1)
+
+    return generated_count, total_input_tokens, total_output_tokens
 
 def main():
     """Main function to generate dataset."""
@@ -191,50 +275,106 @@ def main():
         # Determine count (prioritize positional argument over flag)
         count = args.count if args.count is not None else args.count_flag
 
+        # Validate and set workers
+        max_workers = min(max(1, args.workers), 10)  # Limit to 1-10 workers
+        batch_size = max(1, args.batch_size)
+
         # Load existing results to avoid regenerating
         output_file = 'generated_scripts.json'
         existing_results = load_existing_results(output_file)
 
         # Setup
-        client = setup_bedrock_client()
         objects = read_objects('objects.txt', count)
 
-        # Generate scripts for each object
+        # Initialize counters
         results = []
         skipped_count = 0
         generated_count = 0
+        total_input_tokens = 0
+        total_output_tokens = 0
 
-        for i, object_name in enumerate(objects, 1):
-            logger.info(f"Processing object {i}/{len(objects)}: {object_name}")
+        # Separate existing and new objects
+        objects_to_generate = [obj for obj in objects if obj not in existing_results]
 
-            # Check if result already exists
-            if object_name in existing_results:
-                logger.info(f"Skipping {object_name} - already generated")
-                result = {
-                    "input": object_name,
-                    "output": existing_results[object_name]
+        print(f"📊 Processing {len(objects)} objects:")
+        print(f"   🔄 New to generate: {len(objects_to_generate)}")
+        print(f"   ⏭️  Already exists: {len(objects) - len(objects_to_generate)}")
+        print(f"   🧵 Parallel workers: {max_workers}")
+        print(f"   📦 Batch size: {batch_size}")
+        print()
+
+        # Progress tracking
+        start_time = time.time()
+
+        # Create thread-safe results dictionary and lock
+        results_dict = {}
+        lock = threading.Lock()
+
+        # Add existing results first
+        for obj in objects:
+            if obj in existing_results:
+                results_dict[obj] = {
+                    "input": obj,
+                    "output": existing_results[obj]
                 }
                 skipped_count += 1
-            else:
-                logger.info(f"Generating new script for {object_name}")
-                generated_script = generate_blender_script(client, object_name)
-                result = {
-                    "input": object_name,
-                    "output": generated_script
-                }
-                generated_count += 1
 
-            results.append(result)
+        # Process new objects in parallel batches
+        if objects_to_generate:
+            with tqdm(total=len(objects), desc="Processing objects",
+                     bar_format="{l_bar}{bar}| {n_fmt}/{total_fmt} [{elapsed}<{remaining}]",
+                     ncols=100, initial=skipped_count) as pbar:
+
+                # Process in batches
+                for i in range(0, len(objects_to_generate), batch_size):
+                    batch = objects_to_generate[i:i + batch_size]
+
+                    batch_generated, batch_input_tokens, batch_output_tokens = process_batch_parallel(
+                        batch, max_workers, pbar, results_dict, lock
+                    )
+
+                    generated_count += batch_generated
+                    total_input_tokens += batch_input_tokens
+                    total_output_tokens += batch_output_tokens
+
+        # Convert results dict to ordered list
+        for obj in objects:
+            if obj in results_dict:
+                results.append(results_dict[obj])
 
         # Save results
         save_results(results, output_file)
 
-        logger.info("Dataset generation completed successfully!")
-        print(f"Processed {len(results)} objects:")
-        print(f"- Generated new scripts: {generated_count}")
-        print(f"- Skipped existing: {skipped_count}")
-        print(f"- Total in output: {len(results)}")
+        # Final summary
+        total_time = time.time() - start_time
+        print(f"\n✅ Dataset generation completed!")
+        print(f"📈 Summary:")
+        print(f"   📝 Total processed: {len(results)} objects")
+        print(f"   🆕 Generated new: {generated_count}")
+        print(f"   ⏭️  Skipped existing: {skipped_count}")
+        print(f"   ⏱️  Total time: {format_time(total_time)}")
+        print(f"   🧵 Used {max_workers} parallel workers")
 
+        if generated_count > 0:
+            avg_time_per_gen = total_time / generated_count if generated_count > 0 else 0
+            print(f"   ⚡ Avg time per generation: {format_time(avg_time_per_gen)}")
+            speedup = max_workers if total_time > 0 else 1
+            print(f"   🚀 Estimated speedup: ~{speedup:.1f}x vs sequential")
+
+        print(f"\n🔢 Token Usage:")
+        print(f"   📥 Input tokens: {total_input_tokens:,}")
+        print(f"   📤 Output tokens: {total_output_tokens:,}")
+        print(f"   📊 Total tokens: {total_input_tokens + total_output_tokens:,}")
+
+        if generated_count > 0:
+            print(f"   📊 Avg tokens per object: {(total_input_tokens + total_output_tokens) // generated_count:,}")
+
+    except KeyboardInterrupt:
+        print(f"\n⏸️  Generation interrupted by user")
+        print(f"📊 Progress saved: {generated_count} objects generated, {skipped_count} skipped")
+        if results:
+            save_results(results, output_file)
+            print(f"💾 Results saved to {output_file}")
     except Exception as e:
         logger.error(f"Script failed: {e}")
         raise

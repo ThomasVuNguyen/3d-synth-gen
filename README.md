@@ -1,14 +1,23 @@
 # 3D Object Generator
 
-Generate comprehensive lists of 3D object names for synthetic file generation.
+Generate comprehensive lists of 3D object names for synthetic file generation and create Blender Python scripts using AWS Bedrock.
 
 ## Usage
 
+### Generate Object List
 ```bash
 python generate-entity.py
 ```
 
 Generates `objects.txt` containing thousands of 3D object names suitable for synthetic 3D file generation.
+
+### Generate Blender Scripts
+```bash
+pip install -r requirements.txt
+python generate-dataset.py
+```
+
+Uses AWS Bedrock Sonnet 4 to generate Blender Python scripts for the first 3 objects from `objects.txt`. Results are saved to `generated_scripts.json`.
 
 ## Output
 

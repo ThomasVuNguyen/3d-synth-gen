@@ -236,7 +236,7 @@ def format_time(seconds: float) -> str:
     else:
         return f"{seconds/3600:.1f}h"
 
-def process_batch_parallel(objects_to_generate: List[str], max_workers: int, pbar, results_dict: Dict[str, Dict], lock: threading.Lock, query_times: List[float]) -> tuple[int, int, int]:
+def process_batch_parallel(objects_to_generate: List[str], max_workers: int, pbar, results_dict: Dict[str, Dict], lock: threading.Lock, query_times: List[float], all_objects: List[str], existing_results: Dict[str, str], output_file: str) -> tuple[int, int, int]:
     """Process a batch of objects in parallel."""
     total_input_tokens = 0
     total_output_tokens = 0
@@ -269,6 +269,20 @@ def process_batch_parallel(objects_to_generate: List[str], max_workers: int, pba
 
                     pbar.update(1)
                     pbar.set_postfix_str(f"Avg: {format_time(avg_time)} | Workers: {max_workers}")
+                    
+                    # Save immediately after each object (preserve all existing results)
+                    if generated_count % 1 == 0:  # Save every object
+                        current_results = []
+                        # Include ALL existing results plus any new ones
+                        for obj in all_objects:
+                            if obj in existing_results:
+                                current_results.append({
+                                    "input": obj,
+                                    "output": existing_results[obj]
+                                })
+                            elif obj in results_dict:
+                                current_results.append(results_dict[obj])
+                        save_results(current_results, output_file)
 
             except Exception as e:
                 object_name = future_to_object[future]
@@ -299,8 +313,14 @@ def main():
         output_file = 'generated_scripts.json'
         existing_results = load_existing_results(output_file)
 
-        # Setup
-        objects = read_objects('objects.txt', count)
+        # Setup - read ALL objects first
+        all_objects = read_objects('objects.txt', None)
+        
+        # If count is specified, only process that many from the beginning
+        if count is not None:
+            objects = all_objects[:count]
+        else:
+            objects = all_objects
 
         # Initialize counters
         results = []
@@ -349,16 +369,26 @@ def main():
                     batch = objects_to_generate[i:i + batch_size]
 
                     batch_generated, batch_input_tokens, batch_output_tokens = process_batch_parallel(
-                        batch, max_workers, pbar, results_dict, lock, query_times
+                        batch, max_workers, pbar, results_dict, lock, query_times, all_objects, existing_results, output_file
                     )
 
                     generated_count += batch_generated
                     total_input_tokens += batch_input_tokens
                     total_output_tokens += batch_output_tokens
 
-        # Convert results dict to ordered list
-        for obj in objects:
-            if obj in results_dict:
+                    # Note: Individual objects are already saved in process_batch_parallel
+
+        # Convert results dict to ordered list - preserve ALL existing results
+        # Start with ALL existing results, then add any new ones
+        for obj in all_objects:
+            if obj in existing_results:
+                # Use existing result
+                results.append({
+                    "input": obj,
+                    "output": existing_results[obj]
+                })
+            elif obj in results_dict:
+                # Use newly generated result
                 results.append(results_dict[obj])
 
         # Save results
@@ -393,9 +423,19 @@ def main():
     except KeyboardInterrupt:
         print(f"\n⏸️  Generation interrupted by user")
         print(f"📊 Progress saved: {generated_count} objects generated, {skipped_count} skipped")
-        if results:
-            save_results(results, output_file)
+
+        # Convert results dict to ordered list for final save
+        current_results = []
+        for obj in objects:
+            if obj in results_dict:
+                current_results.append(results_dict[obj])
+
+        if current_results:
+            save_results(current_results, output_file)
             print(f"💾 Results saved to {output_file}")
+            print(f"📁 Total results in file: {len(current_results)}")
+        else:
+            print("⚠️  No results to save")
     except Exception as e:
         logger.error(f"Script failed: {e}")
         raise

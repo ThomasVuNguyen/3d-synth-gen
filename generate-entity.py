@@ -1,21 +1,21 @@
 #!/usr/bin/env python3
 """
-Generate 50,000+ 3D objects through systematic expansion.
+Generate 100,000+ 3D objects through systematic expansion.
 """
 
 def generate_object_list():
-    """Generate a comprehensive list of 50,000+ 3D object names."""
+    """Generate a comprehensive list of 100,000+ 3D object names."""
     
     # Read from existing objects.txt if available
     try:
         with open('objects.txt', 'r') as f:
             objects = [line.strip() for line in f if line.strip()]
-        if len(objects) >= 50000:
+        if len(objects) >= 100000:
             return objects
     except FileNotFoundError:
         pass
     
-    # If file doesn't exist or has fewer than 50k objects, generate new list
+    # If file doesn't exist or has fewer than 100k objects, generate new list
     all_objects = set()
     
     # Massively expanded base categories
@@ -175,7 +175,83 @@ def generate_object_list():
         'spray paint', 'paint roller', 'paint tray', 'masking tape', 'drop cloth'
     ]
     
-    # Add all categories
+    # NEW MASSIVE CATEGORIES FOR 100K EXPANSION
+    
+    automotive = [
+        'engine', 'transmission', 'brake', 'tire', 'wheel', 'rim', 'hubcap',
+        'bumper', 'fender', 'hood', 'trunk', 'door', 'window', 'windshield',
+        'headlight', 'taillight', 'mirror', 'steering wheel', 'dashboard',
+        'seat', 'seatbelt', 'airbag', 'radiator', 'battery', 'alternator',
+        'starter', 'carburetor', 'exhaust pipe', 'muffler', 'catalytic converter'
+    ]
+    
+    building_materials = [
+        'brick', 'concrete block', 'lumber', 'plywood', 'drywall', 'insulation',
+        'roofing shingles', 'metal roofing', 'vinyl siding', 'stucco', 'paint',
+        'primer', 'stain', 'varnish', 'polyurethane', 'caulk', 'grout', 'tile',
+        'carpet', 'hardwood flooring', 'laminate flooring', 'vinyl flooring',
+        'cement', 'mortar', 'rebar', 'steel beam', 'column', 'foundation'
+    ]
+    
+    food_items = [
+        'apple', 'banana', 'orange', 'grape', 'strawberry', 'blueberry',
+        'watermelon', 'pineapple', 'mango', 'peach', 'pear', 'cherry',
+        'carrot', 'broccoli', 'spinach', 'lettuce', 'tomato', 'potato',
+        'onion', 'garlic', 'pepper', 'cucumber', 'celery', 'corn',
+        'bread', 'cheese', 'milk', 'butter', 'yogurt', 'eggs'
+    ]
+    
+    plants = [
+        'rose', 'tulip', 'daisy', 'sunflower', 'lily', 'orchid', 'carnation',
+        'daffodil', 'iris', 'peony', 'azalea', 'rhododendron', 'hydrangea',
+        'oak tree', 'maple tree', 'pine tree', 'palm tree', 'birch tree',
+        'willow tree', 'cherry tree', 'apple tree', 'fern', 'moss', 'grass',
+        'bamboo', 'cactus', 'succulent', 'ivy', 'vine', 'shrub', 'bush'
+    ]
+    
+    containers = [
+        'box', 'bag', 'suitcase', 'backpack', 'briefcase', 'purse', 'wallet',
+        'envelope', 'package', 'crate', 'barrel', 'bucket', 'bin', 'basket',
+        'jar', 'bottle', 'can', 'container', 'cooler', 'trunk', 'chest',
+        'safe', 'vault', 'locker', 'cabinet', 'drawer', 'shelf', 'rack'
+    ]
+    
+    fabrics = [
+        'cotton', 'wool', 'silk', 'linen', 'polyester', 'nylon', 'rayon',
+        'spandex', 'denim', 'canvas', 'velvet', 'corduroy', 'fleece',
+        'flannel', 'satin', 'chiffon', 'taffeta', 'organza', 'tulle',
+        'leather', 'suede', 'fur', 'felt', 'burlap', 'mesh', 'lace'
+    ]
+    
+    hardware = [
+        'screw', 'nail', 'bolt', 'nut', 'washer', 'bracket', 'hinge',
+        'handle', 'knob', 'lock', 'key', 'chain', 'rope', 'cable',
+        'wire', 'spring', 'gear', 'pulley', 'lever', 'valve', 'pipe',
+        'fitting', 'coupling', 'adapter', 'connector', 'clamp', 'clip'
+    ]
+    
+    laboratory = [
+        'beaker', 'flask', 'test tube', 'petri dish', 'microscope',
+        'telescope', 'scale', 'balance', 'pipette', 'burette', 'funnel',
+        'thermometer', 'barometer', 'ph meter', 'centrifuge', 'incubator',
+        'autoclave', 'spectrometer', 'chromatograph', 'distillation apparatus'
+    ]
+    
+    lighting = [
+        'bulb', 'led', 'fluorescent', 'halogen', 'incandescent', 'chandelier',
+        'pendant light', 'table lamp', 'floor lamp', 'desk lamp', 'wall sconce',
+        'ceiling fan', 'track lighting', 'recessed light', 'spotlight',
+        'floodlight', 'street light', 'lantern', 'flashlight', 'candle'
+    ]
+    
+    mechanical = [
+        'motor', 'engine', 'pump', 'compressor', 'turbine', 'generator',
+        'transformer', 'alternator', 'starter', 'clutch', 'transmission',
+        'differential', 'axle', 'bearing', 'bushing', 'seal', 'gasket',
+        'filter', 'belt', 'chain', 'sprocket', 'cam', 'crankshaft'
+    ]
+    
+    # Add all expanded categories
     all_objects.update(furniture)
     all_objects.update(vehicles)
     all_objects.update(tools)
@@ -192,6 +268,16 @@ def generate_object_list():
     all_objects.update(medical)
     all_objects.update(garden)
     all_objects.update(art_supplies)
+    all_objects.update(automotive)
+    all_objects.update(building_materials)
+    all_objects.update(food_items)
+    all_objects.update(plants)
+    all_objects.update(containers)
+    all_objects.update(fabrics)
+    all_objects.update(hardware)
+    all_objects.update(laboratory)
+    all_objects.update(lighting)
+    all_objects.update(mechanical)
     
     # Massively expanded modifiers for 50K target
     materials = [
@@ -264,13 +350,17 @@ def generate_object_list():
         'closet', 'hallway', 'entryway', 'foyer', 'sunroom', 'conservatory'
     ]
     
-    # Expanded key objects for more combinations
+    # Massively expanded key objects for 100K combinations
     key_objects = [
         'chair', 'table', 'bed', 'sofa', 'desk', 'shelf', 'cabinet', 'lamp',
         'mirror', 'vase', 'bowl', 'plate', 'cup', 'mug', 'glass', 'bottle',
         'pot', 'pan', 'knife', 'fork', 'spoon', 'clock', 'picture', 'frame',
         'box', 'basket', 'bin', 'container', 'jar', 'bag', 'purse', 'wallet',
-        'pillow', 'cushion', 'blanket', 'towel', 'curtain', 'rug', 'carpet'
+        'pillow', 'cushion', 'blanket', 'towel', 'curtain', 'rug', 'carpet',
+        'engine', 'wheel', 'tire', 'door', 'window', 'motor', 'pump', 'filter',
+        'bulb', 'wire', 'pipe', 'valve', 'gear', 'spring', 'handle', 'knob',
+        'screw', 'bolt', 'nail', 'hinge', 'lock', 'key', 'chain', 'cable',
+        'seat', 'hood', 'roof', 'floor', 'wall', 'beam', 'column', 'panel'
     ]
     
     # Generate massive combinations to reach 50K+
@@ -350,10 +440,72 @@ def generate_object_list():
     
     # Material + condition + object combinations
     print("Generating material-condition combinations...")
-    for material in materials[:20]:   # Top 20 materials
+    for material in materials[:25]:   # Top 25 materials
         for condition in conditions:  # All conditions
-            for obj in key_objects[:15]:  # Top 15 objects
+            for obj in key_objects[:20]:  # Top 20 objects
                 all_objects.add(f"{material} {condition} {obj}")
+    
+    # MASSIVE EXPANSION FOR 100K TARGET
+    
+    # Size + material + color combinations
+    print("Generating size-material-color combinations...")
+    for size in sizes[:15]:          # Top 15 sizes
+        for material in materials[:15]:  # Top 15 materials
+            for color in colors[:15]:    # Top 15 colors
+                for obj in key_objects[:8]:  # Top 8 objects
+                    all_objects.add(f"{size} {material} {color} {obj}")
+    
+    # Style + condition + room combinations
+    print("Generating style-condition-room combinations...")
+    for style in styles[:20]:        # Top 20 styles
+        for condition in conditions[:10]:  # Top 10 conditions
+            for room in rooms[:15]:      # Top 15 rooms
+                for obj in key_objects[:10]:  # Top 10 objects
+                    all_objects.add(f"{style} {condition} {room} {obj}")
+    
+    # Modifier + material + size combinations
+    print("Generating modifier-material-size combinations...")
+    for modifier in modifiers[:15]:   # Top 15 modifiers
+        for material in materials[:15]:  # Top 15 materials
+            for size in sizes[:12]:      # Top 12 sizes
+                for obj in key_objects[:12]:  # Top 12 objects
+                    all_objects.add(f"{modifier} {material} {size} {obj}")
+    
+    # Color + style + modifier combinations
+    print("Generating color-style-modifier combinations...")
+    for color in colors[:20]:        # Top 20 colors
+        for style in styles[:15]:    # Top 15 styles
+            for modifier in modifiers[:12]:  # Top 12 modifiers
+                for obj in key_objects[:10]:  # Top 10 objects
+                    all_objects.add(f"{color} {style} {modifier} {obj}")
+    
+    # Room + material + condition + size combinations (5-word combos!)
+    print("Generating 5-word combinations...")
+    for room in rooms[:10]:          # Top 10 rooms
+        for material in materials[:10]:  # Top 10 materials
+            for condition in conditions[:8]:  # Top 8 conditions
+                for size in sizes[:8]:       # Top 8 sizes
+                    for obj in key_objects[:6]:  # Top 6 objects
+                        all_objects.add(f"{room} {material} {condition} {size} {obj}")
+    
+    # Brand-style combinations (adding brand-like modifiers)
+    brands = ['premium', 'luxury', 'designer', 'artisan', 'custom', 'handcrafted',
+              'vintage', 'antique', 'modern', 'classic', 'industrial', 'commercial']
+    print("Generating brand combinations...")
+    for brand in brands:
+        for material in materials[:20]:  # Top 20 materials
+            for obj in key_objects[:25]:     # Top 25 objects
+                all_objects.add(f"{brand} {material} {obj}")
+    
+    # Technical specifications combinations
+    specs = ['heavy duty', 'lightweight', 'extra strong', 'ultra thin', 
+             'high capacity', 'low profile', 'multi purpose', 'single use',
+             'weatherproof', 'indoor', 'outdoor', 'professional grade']
+    print("Generating technical spec combinations...")
+    for spec in specs:
+        for color in colors[:15]:        # Top 15 colors
+            for obj in key_objects[:20]:     # Top 20 objects
+                all_objects.add(f"{spec} {color} {obj}")
     
     print(f"Generated {len(all_objects)} unique objects")
     return sorted(list(all_objects))
@@ -369,8 +521,10 @@ def main():
     print(f"Generated {len(objects)} objects")
     print(f"Saved to objects.txt")
     
-    if len(objects) >= 50000:
-        print("✅ Successfully reached 50,000+ objects!")
+    if len(objects) >= 100000:
+        print("✅ Successfully reached 100,000+ objects!")
+    elif len(objects) >= 50000:
+        print(f"✅ Generated {len(objects)} objects (50K+ target met)")
     elif len(objects) >= 10000:
         print(f"✅ Generated {len(objects)} objects (10K+ target met)")
     else:

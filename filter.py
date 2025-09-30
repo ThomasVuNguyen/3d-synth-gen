@@ -5,6 +5,7 @@ import os
 import subprocess
 import tempfile
 import base64
+import gc
 from datasets import Dataset, Features, Value, Image as HFImage
 from PIL import Image
 import io
@@ -60,15 +61,25 @@ def run_blender_pipeline(script_content, temp_dir):
         if image.mode == 'RGBA':
             image = image.convert('RGB')
 
+        # Clean up temporary files to free disk space
+        try:
+            os.remove(stl_path)
+            os.remove(png_path)
+        except:
+            pass
+
         return image, None
 
     except subprocess.TimeoutExpired:
         return None, "Blender process timed out"
     except Exception as e:
         return None, f"Unexpected error: {str(e)}"
+    finally:
+        # Force garbage collection after each Blender run
+        gc.collect()
 
-def process_dataset(json_path, num_rows=None):
-    """Process the dataset and create HuggingFace dataset"""
+def process_dataset(json_path, num_rows=None, batch_size=100):
+    """Process the dataset and create HuggingFace dataset with memory optimization"""
 
     # Read the JSON file
     with open(json_path, 'r') as f:
@@ -78,43 +89,6 @@ def process_dataset(json_path, num_rows=None):
     if num_rows is not None:
         data = data[:num_rows]
 
-    processed_data = []
-
-    for i, item in enumerate(data):
-        print(f"Processing item {i+1}/{len(data)}: {item['input']}")
-
-        # Skip items that already have errors in the output
-        if item['output'].startswith("# Error"):
-            processed_data.append({
-                'input': item['input'],
-                'script': None,
-                'image': None,
-                'error': item['output']
-            })
-            continue
-
-        # Extract Python script
-        script = extract_python_script(item['output'])
-        if not script:
-            processed_data.append({
-                'input': item['input'],
-                'script': None,
-                'image': None,
-                'error': "No Python script found in output"
-            })
-            continue
-
-        # Create temporary directory for this item
-        with tempfile.TemporaryDirectory() as temp_dir:
-            image, error = run_blender_pipeline(script, temp_dir)
-
-            processed_data.append({
-                'input': item['input'],
-                'script': script,
-                'image': image,
-                'error': error
-            })
-
     # Define dataset features with proper Image type
     features = Features({
         'input': Value('string'),
@@ -123,14 +97,95 @@ def process_dataset(json_path, num_rows=None):
         'error': Value('string')
     })
 
-    # Create HuggingFace dataset with proper features
-    dataset = Dataset.from_list(processed_data, features=features)
+    # Initialize counters
+    total_items = len(data)
+    successful = 0
+    failed = 0
+
+    # Process data in batches to manage memory
+    datasets = []
+
+    for batch_start in range(0, total_items, batch_size):
+        batch_end = min(batch_start + batch_size, total_items)
+        batch_data = data[batch_start:batch_end]
+        processed_batch = []
+
+        print(f"Processing batch {batch_start//batch_size + 1}/{(total_items + batch_size - 1)//batch_size}")
+
+        for i, item in enumerate(batch_data):
+            global_index = batch_start + i
+            print(f"Processing item {global_index+1}/{total_items}: {item['input']}")
+
+            # Skip items that already have errors in the output
+            if item['output'].startswith("# Error"):
+                processed_batch.append({
+                    'input': item['input'],
+                    'script': None,
+                    'image': None,
+                    'error': item['output']
+                })
+                failed += 1
+                continue
+
+            # Extract Python script
+            script = extract_python_script(item['output'])
+            if not script:
+                processed_batch.append({
+                    'input': item['input'],
+                    'script': None,
+                    'image': None,
+                    'error': "No Python script found in output"
+                })
+                failed += 1
+                continue
+
+            # Create temporary directory for this item
+            with tempfile.TemporaryDirectory() as temp_dir:
+                image, error = run_blender_pipeline(script, temp_dir)
+
+                processed_batch.append({
+                    'input': item['input'],
+                    'script': script,
+                    'image': image,
+                    'error': error
+                })
+
+                if image is not None:
+                    successful += 1
+                else:
+                    failed += 1
+
+        # Create dataset from batch and add to list
+        batch_dataset = Dataset.from_list(processed_batch, features=features)
+        datasets.append(batch_dataset)
+
+        # Clear batch data and force garbage collection
+        del processed_batch
+        del batch_data
+        gc.collect()
+
+        print(f"Batch completed. Memory freed. Progress: {successful} successful, {failed} failed")
+
+    # Concatenate all batch datasets
+    print("Combining all batches...")
+    if datasets:
+        dataset = datasets[0]
+        for batch_dataset in datasets[1:]:
+            dataset = dataset.concatenate(batch_dataset)
+    else:
+        dataset = Dataset.from_list([], features=features)
+
+    # Clear batch datasets and force garbage collection
+    del datasets
+    gc.collect()
 
     # Save dataset locally
+    print("Saving dataset locally...")
     dataset.save_to_disk("3dgen_filtered_dataset")
 
     # Upload to HuggingFace Hub
     try:
+        print("Uploading to HuggingFace Hub...")
         dataset.push_to_hub("ThomasTheMaker/BlenderCAD-Filtered", private=False)
         print("Dataset uploaded to HuggingFace Hub: ThomasTheMaker/BlenderCAD-Filtered")
     except Exception as e:
@@ -138,11 +193,8 @@ def process_dataset(json_path, num_rows=None):
         print("Dataset saved locally only")
 
     # Print summary
-    successful = sum(1 for item in processed_data if item['image'] is not None)
-    failed = len(processed_data) - successful
-
     print(f"\nProcessing complete:")
-    print(f"Total items: {len(processed_data)}")
+    print(f"Total items: {total_items}")
     print(f"Successful: {successful}")
     print(f"Failed: {failed}")
 
